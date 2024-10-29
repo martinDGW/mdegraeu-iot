@@ -1,0 +1,25 @@
+CPU=2
+RAM=2048
+DEBIAN="debian/bookworm64"
+
+IP="192.168.56.110"
+
+Vagrant.configure("2") do |config|
+
+    config.vm.define "mdegraeuS" do |server|
+        server.vm.box = DEBIAN
+        server.vm.hostname = "mdegraeuS"
+        server.vm.network "private_network", ip: IP
+        server.vm.boot_timeout = 400
+
+        server.vm.provider "virtualbox" do |vb|
+            vb.gui = false
+            vb.cpus = CPU
+            vb.memory = RAM
+        end
+
+        server.vm.synced_folder "./cluster", "/cluster"
+        server.vm.provision "shell", privileged: true,  path: "k3s-master.sh", args: [IP]
+
+    end
+end

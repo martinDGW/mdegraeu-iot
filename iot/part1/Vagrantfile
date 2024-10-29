@@ -1,0 +1,40 @@
+
+CPU=1
+RAM=1024
+DEBIAN="debian/bookworm64"
+
+Vagrant.configure("2") do |config|
+
+    config.vm.define "mdegraeuS" do |server|
+        server.vm.box = DEBIAN
+        server.vm.hostname = "mdegraeuS"
+        server.vm.network "private_network", ip: "192.168.56.110"
+        server.vm.boot_timeout = 400
+
+        server.vm.provider "virtualbox" do |vb|
+            vb.gui = false
+            vb.cpus = CPU
+            vb.memory = RAM
+        end
+        
+        server.vm.synced_folder "./secrets", "/secrets"
+        server.vm.provision "shell", privileged: true,  path: "k3s-master.sh"
+
+    end
+
+    config.vm.define "mdegraeuSW" do |worker|
+        worker.vm.box = DEBIAN
+        worker.vm.hostname = "mdegraeuSW"
+        worker.vm.network "private_network", ip: "192.168.56.111"
+        worker.vm.boot_timeout = 400
+
+        worker.vm.provider "virtualbox" do |vb|
+            vb.gui = false
+            vb.cpus = CPU
+            vb.memory = RAM
+        end
+        worker.vm.synced_folder "./secrets", "/secrets"
+        worker.vm.provision "shell", privileged: true,  path: "k3s-agent.sh"
+    end
+
+end
